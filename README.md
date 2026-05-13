@@ -7,7 +7,7 @@ A CLI tool to export your ClickUp Docs and Wikis to local markdown files, preser
 - 📁 **Preserves hierarchy** - Nested pages become nested folders
 - 📝 **Clean markdown** - Exports content in standard markdown format
 - ⚡ **Fast & reliable** - Handles rate limiting and retries automatically
-- 🔒 **Secure** - Your token stays local, never stored
+- 🔒 **Secure** - Token via `.env` (see `.env.example`), env var, or `--token`; only sent to ClickUp’s API
 - 🎯 **Flexible** - Export all docs or a single doc
 
 ## Installation
@@ -18,25 +18,40 @@ A CLI tool to export your ClickUp Docs and Wikis to local markdown files, preser
 git clone https://github.com/abderrahmaneMustapha/clickup-docs-bulk-export.git
 cd clickup-docs-bulk-export
 npm install
+cp .env.example .env
+# Edit .env and set CLICKUP_API_TOKEN
 npm run build
 ```
 
-Then run the CLI:
+Then run the CLI (workspace ID is always required):
 
 ```bash
-node dist/cli.js --token YOUR_TOKEN --workspace YOUR_WORKSPACE_ID
+node dist/cli.js --workspace YOUR_WORKSPACE_ID
 ```
+
+You can use `--token` instead of `.env` if you prefer. See `.env.example` for the variable name.
 
 ### Global installation (from npm)
 
 ```bash
 npm install -g clickup-docs-exporter
-clickup-docs-exporter --token YOUR_TOKEN --workspace YOUR_WORKSPACE_ID
+cd /your/project   # optional: directory with a .env file
+clickup-docs-exporter --workspace YOUR_WORKSPACE_ID
 ```
+
+Use `--token` or a `.env` file with `CLICKUP_API_TOKEN` (see the repo’s `.env.example`).
 
 ## Usage
 
 ### Export all docs from a workspace
+
+```bash
+clickup-docs-exporter \
+  --workspace 1234567 \
+  --output ./my-docs
+```
+
+With a token from `.env` (copy from `.env.example`) or `CLICKUP_API_TOKEN`. To pass the token on the command line instead:
 
 ```bash
 clickup-docs-exporter \
@@ -59,7 +74,7 @@ clickup-docs-exporter \
 
 | Option | Alias | Required | Description |
 |--------|-------|----------|-------------|
-| `--token` | `-t` | Yes | Your ClickUp API token |
+| `--token` | `-t` | Yes* | API token (*omit if set in `.env` or `CLICKUP_API_TOKEN`; see `.env.example`*) |
 | `--workspace` | `-w` | Yes | ClickUp Workspace ID |
 | `--output` | `-o` | No | Output directory (default: `./clickup-docs`) |
 | `--doc` | `-d` | No | Export single doc by ID |

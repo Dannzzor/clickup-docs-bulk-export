@@ -39,10 +39,18 @@ export class ClickUpExporter {
     // Verify workspace access
     this.logger.info('Verifying workspace access...')
     const workspaces = await this.client.getWorkspaces()
-    
-    const workspace = workspaces.find(w => w.id === workspaceId)
+
+    const workspace = workspaces.find((w) => String(w.id) === String(workspaceId))
     if (!workspace && workspaces.length > 0) {
-      this.logger.warn(`Workspace ${workspaceId} not found, using first available: ${workspaces[0].name}`)
+      const list = workspaces.map((w) => `${w.name} (${w.id})`).join(', ')
+      this.logger.warn(
+        `Workspace ID "${workspaceId}" is not in this token's workspace list: ${list}. ` +
+          'Continuing with the ID you provided; if it is wrong you may get errors or empty results.'
+      )
+    } else if (!workspace && workspaces.length === 0) {
+      this.logger.warn(
+        'No workspaces returned for this token. Continuing with the provided workspace ID; verify API access.'
+      )
     }
 
     let docs: ClickUpDoc[]

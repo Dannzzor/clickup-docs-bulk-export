@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import 'dotenv/config'
 import { Command } from 'commander'
 import chalk from 'chalk'
 import ora from 'ora'
@@ -14,19 +15,36 @@ program
   .version('1.0.0')
 
 program
-  .requiredOption('-t, --token <token>', 'ClickUp API token (pk_xxx or personal token)')
+  .option(
+    '-t, --token <token>',
+    'ClickUp API token (optional if CLICKUP_API_TOKEN is set in environment or .env — see .env.example)'
+  )
   .requiredOption('-w, --workspace <id>', 'ClickUp Workspace ID')
   .option('-o, --output <dir>', 'Output directory', './clickup-docs')
   .option('-d, --doc <id>', 'Export single doc by ID (optional)')
   .option('-v, --verbose', 'Verbose output', false)
   .action(async (opts) => {
+    const tokenFromFlag = typeof opts.token === 'string' ? opts.token.trim() : ''
+    const tokenFromEnv = process.env.CLICKUP_API_TOKEN?.trim() ?? ''
+    const token = tokenFromFlag || tokenFromEnv
+
+    if (!token) {
+      console.error()
+      console.error(
+        chalk.red('Error:'),
+        'Missing API token. Pass --token, set CLICKUP_API_TOKEN, or copy .env.example to .env.'
+      )
+      console.error()
+      process.exit(1)
+    }
+
     console.log()
     console.log(chalk.bold.cyan('📚 ClickUp Docs Exporter'))
     console.log(chalk.gray('─'.repeat(40)))
     console.log()
 
     const options: ExportOptions = {
-      token: opts.token,
+      token,
       workspaceId: opts.workspace,
       outputDir: opts.output,
       docId: opts.doc,
@@ -38,7 +56,8 @@ program
       ? `${options.token.slice(0, 6)}...${options.token.slice(-4)}`
       : '***'
 
-    console.log(chalk.gray('  Token:'), maskedToken)
+    const tokenSource = tokenFromFlag ? '' : ' (from CLICKUP_API_TOKEN)'
+    console.log(chalk.gray('  Token:'), maskedToken + tokenSource)
     console.log(chalk.gray('  Workspace:'), options.workspaceId)
     console.log(chalk.gray('  Output:'), options.outputDir)
     if (options.docId) {
