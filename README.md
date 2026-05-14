@@ -1,6 +1,8 @@
 # ClickUp Docs Exporter
 
-A CLI tool (and optional local dashboard) to export your ClickUp Docs and Wikis to markdown files, preserving the full **page** hierarchy inside each doc.
+A CLI tool (and optional local web dashboard) to export your ClickUp Docs and Wikis to markdown files, preserving the full **page** hierarchy inside each doc.
+
+![Web dashboard: export form, file list, markdown preview, and activity log](docs/assets/dashboard-preview.png)
 
 ## Credits
 
@@ -22,15 +24,6 @@ This repository extends that work with: a local web dashboard, richer export rep
 - **Frontmatter** — Includes `clickup_doc_id` and `clickup_page_id` where applicable for easier matching and future tooling
 - **Rate limits & retries** — Handles 429 and transient 5xx responses
 - **Secure token handling** — Token via `.env` (see `.env.example`), `CLICKUP_API_TOKEN`, or `--token`; only sent to ClickUp’s API
-
-## Screenshots
-
-Screenshots are optional. Add images under [`docs/assets/`](docs/assets/) (see that folder’s readme for suggested filenames), then uncomment the lines below.
-
-<!--
-![Export dashboard — form and file list](docs/assets/dashboard-export.png)
-![Markdown preview and activity log](docs/assets/dashboard-preview.png)
--->
 
 ## Installation
 
