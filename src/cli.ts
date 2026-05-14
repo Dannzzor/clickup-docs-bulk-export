@@ -22,6 +22,19 @@ program
   .requiredOption('-w, --workspace <id>', 'ClickUp Workspace ID')
   .option('-o, --output <dir>', 'Output directory', './clickup-docs')
   .option('-d, --doc <id>', 'Export single doc by ID (optional)')
+  .option(
+    '-r, --resume',
+    'Skip page content API calls when the target markdown file already exists; reuse .clickup-export/page-listing.json when present',
+    false
+  )
+  .option('--include-archived', 'Include archived docs in the workspace doc list', false)
+  .option('--include-deleted', 'Include deleted docs in the workspace doc list', false)
+  .option('--skip-report', 'Do not write export-report.json / export-report.md', false)
+  .option(
+    '--layout <mode>',
+    'Output layout: flat (default) or hierarchy (Space / Folder / List / Doc folders)',
+    'flat'
+  )
   .option('-v, --verbose', 'Verbose output', false)
   .action(async (opts) => {
     const tokenFromFlag = typeof opts.token === 'string' ? opts.token.trim() : ''
@@ -43,12 +56,20 @@ program
     console.log(chalk.gray('─'.repeat(40)))
     console.log()
 
+    const layoutRaw = typeof opts.layout === 'string' ? opts.layout.toLowerCase() : 'flat'
+    const layout = layoutRaw === 'hierarchy' ? 'hierarchy' : 'flat'
+
     const options: ExportOptions = {
       token,
       workspaceId: opts.workspace,
       outputDir: opts.output,
       docId: opts.doc,
       verbose: opts.verbose,
+      resume: Boolean(opts.resume),
+      includeArchived: Boolean(opts.includeArchived),
+      includeDeleted: Boolean(opts.includeDeleted),
+      noReport: Boolean(opts.skipReport),
+      layout,
     }
 
     // Mask token for display
@@ -63,6 +84,16 @@ program
     if (options.docId) {
       console.log(chalk.gray('  Doc ID:'), options.docId)
     }
+    if (options.resume) {
+      console.log(chalk.gray('  Resume:'), 'yes (skip existing page files & cached listings)')
+    }
+    if (options.includeArchived) {
+      console.log(chalk.gray('  Include archived docs:'), 'yes')
+    }
+    if (options.includeDeleted) {
+      console.log(chalk.gray('  Include deleted docs:'), 'yes')
+    }
+    console.log(chalk.gray('  Layout:'), options.layout)
     console.log()
 
     const spinner = ora('Starting export...').start()
@@ -80,15 +111,25 @@ program
       console.log(chalk.gray('  Docs exported:'), chalk.white(result.totalDocs))
       console.log(chalk.gray('  Pages exported:'), chalk.white(result.totalPages))
       console.log(chalk.gray('  Output directory:'), chalk.white(result.outputDir))
-      
+
+      const problemCount = result.issues.filter((i) => i.kind !== 'resume_skipped_content').length
+      if (result.reportJsonPath && result.reportMdPath) {
+        console.log(chalk.gray('  Report:'), chalk.white(result.reportMdPath))
+        if (problemCount > 0) {
+          console.log(
+            chalk.yellow(`  Export issues (excluding resume skips): ${problemCount} — see report above`)
+          )
+        }
+      }
+
       if (result.errors.length > 0) {
         console.log()
         console.log(chalk.yellow(`  ⚠ ${result.errors.length} warning(s):`))
-        result.errors.slice(0, 5).forEach(err => {
+        result.errors.slice(0, 8).forEach((err) => {
           console.log(chalk.gray(`    - ${err}`))
         })
-        if (result.errors.length > 5) {
-          console.log(chalk.gray(`    ... and ${result.errors.length - 5} more`))
+        if (result.errors.length > 8) {
+          console.log(chalk.gray(`    ... and ${result.errors.length - 8} more (full list in export-report.json)`))
         }
       }
 

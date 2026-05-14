@@ -3,6 +3,7 @@ node_modules/
 
 # Build output
 dist/
+dashboard/dist/
 
 # Environment
 .env
