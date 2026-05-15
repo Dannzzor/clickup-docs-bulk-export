@@ -205,9 +205,6 @@ After each run (unless `--skip-report`), read **`export-report.md`** for a human
 - **Version control** — Track changes with git (export output is gitignored by default under `clickup-docs/`)
 - **AI / search** — Use exported markdown as context
 
-## Need a hosted solution?
-
-If you want to publish your ClickUp docs as a website without running this tool yourself, see [WikiBeem](https://wikibeem.com) (mentioned in the upstream project as well).
 
 ## Requirements
 
@@ -225,4 +222,3 @@ Issues and pull requests are welcome.
 ## Links
 
 - [Original repository](https://github.com/abderrahmaneMustapha/clickup-docs-bulk-export) — Toumi Abderrahmane
-- [WikiBeem](https://wikibeem.com)
